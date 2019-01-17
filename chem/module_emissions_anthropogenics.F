@@ -163,7 +163,6 @@ CONTAINS
         else if( config_flags%chem_opt == CRIMECH_KPP &
           .or. config_flags%chem_opt == CRI_MOSAIC_8BIN_AQ_KPP &
           .or. config_flags%chem_opt == CRI_MOSAIC_4BIN_AQ_KPP) then
-           chem(i,k,j,p_no2) = chem(i,k,j,p_no2) + emis_ant(i,k,j,p_e_no2)*conv_rho
            chem(i,k,j,p_c2h6) = chem(i,k,j,p_c2h6) + emis_ant(i,k,j,p_e_c2h6)*conv_rho
            chem(i,k,j,p_c2h4) = chem(i,k,j,p_c2h4) + emis_ant(i,k,j,p_e_c2h4)*conv_rho
            chem(i,k,j,p_c5h8) = chem(i,k,j,p_c5h8) + emis_ant(i,k,j,p_e_c5h8)*conv_rho
