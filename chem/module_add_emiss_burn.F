@@ -329,6 +329,74 @@ CONTAINS
         enddo
         enddo
         enddo
+
+!++ SAN	- Modifying emission routine to make CBMZ_MOSAIC compatible with PREP-Chem 
+!		  in RADM_WRF_FIM mode.
+        
+! Adding case for fire emissions to be added to CBMZ chemical schemes
+! Based on using RADM speciation, created from running PREP-Chem in RADM_WRF_FIM mode (emiss_opt = 5)
+      CASE (CBMZ, CBMZ_BB, CBMZ_BB_KPP, CBMZ_MOSAIC_4BIN, CBMZ_MOSAIC_8BIN, &
+          CBMZ_MOSAIC_4BIN_AQ, CBMZ_MOSAIC_8BIN_AQ, &
+          CBMZSORG, CBMZSORG_AQ, CBMZ_MOSAIC_DMS_4BIN, CBMZ_MOSAIC_DMS_8BIN, &
+          CBMZ_MOSAIC_KPP, &
+          CBMZ_MOSAIC_DMS_4BIN_AQ, CBMZ_MOSAIC_DMS_8BIN_AQ, CBMZ_MOSAIC_AQ_KPP)
+          
+	  call wrf_debug(15,'Fire emissions: mapping RADM2 fire emissions to CBMZ speciation')
+          
+          do j=jts,jte
+            do i=its,ite
+             do k=kts,kte
+        		conv_rho=4.828e-4/rho_phy(i,k,j)*dtstep/60./dz8w(i,k,j)
+				chem(i,k,j,p_no) = chem(i,k,j,p_no) 					&
+					+ebu(i,k,j,p_ebu_no)*conv_rho       
+				chem(i,k,j,p_no2) = chem(i,k,j,p_no2) 					&
+					+ebu(i,k,j, p_ebu_no2)*conv_rho     
+				chem(i,k,j,p_co) = chem(i,k,j,p_co) 					&
+					+ebu(i,k,j, p_ebu_co)*conv_rho     
+				chem(i,k,j,p_eth) = chem(i,k,j,p_eth) 					&
+					+ebu(i,k,j,p_ebu_eth)*conv_rho     
+				! Calc hc5 emissions as combination of VOCs (see cbmz_addemiss.F) : 
+				chem(i,k,j,p_par) = chem(i,k,j,p_par) 					&
+					+conv_rho*(0.4*ebu(i,k,j,p_ebu_ald) + 2.9*ebu(i,k,j,p_ebu_hc3) &
+                  + 4.8*ebu(i,k,j,p_ebu_hc5) + 7.9*ebu(i,k,j,p_ebu_hc8)       &
+                  + 0.9*ebu(i,k,j,p_ebu_ket) + 2.8*ebu(i,k,j,p_ebu_oli)       &
+                  + 1.8*ebu(i,k,j,p_ebu_olt) + 1.0*ebu(i,k,j,p_ebu_ete))  
+				chem(i,k,j,p_olt) = chem(i,k,j,p_olt) 					&
+					+ebu(i,k,j,p_ebu_olt)*conv_rho     
+				chem(i,k,j,p_oli) = chem(i,k,j,p_oli) 					&
+					+ebu(i,k,j,p_ebu_oli)*conv_rho  
+				chem(i,k,j,p_iso) = chem(i,k,j,p_iso) 					&
+					+ebu(i,k,j,p_ebu_iso)*conv_rho
+				chem(i,k,j,p_tol) = chem(i,k,j,p_tol) 					&
+					+ebu(i,k,j,p_ebu_tol)*conv_rho    
+				chem(i,k,j,p_xyl) = chem(i,k,j,p_xyl) 					&
+					+ebu(i,k,j,p_ebu_xyl)*conv_rho     
+				chem(i,k,j,p_csl) = chem(i,k,j,p_csl) 					&
+					+ebu(i,k,j,p_ebu_csl)*conv_rho
+					! map ol2 to emissions of ete (ethene)
+				chem(i,k,j,p_ol2) = chem(i,k,j,p_ol2) 					&
+					+ebu(i,k,j,p_ebu_ete)*conv_rho          
+				chem(i,k,j,p_hcho) = chem(i,k,j,p_hcho) 				&
+					+ebu(i,k,j,p_ebu_hcho)*conv_rho 
+				chem(i,k,j,p_ald) = chem(i,k,j,p_ald) 					&
+					+ebu(i,k,j,p_ebu_ald)*conv_rho 
+				chem(i,k,j,p_ket) = chem(i,k,j,p_ket) 					&
+					+ebu(i,k,j,p_ebu_ket)*conv_rho     
+				chem(i,k,j,p_ora1) = chem(i,k,j,p_ora1) 				&
+					+ebu(i,k,j,p_ebu_ora1)*conv_rho     
+				chem(i,k,j,p_ora2) = chem(i,k,j,p_ora2) 				&
+					+ebu(i,k,j,p_ebu_ora2)*conv_rho     
+				chem(i,k,j,p_so2) = chem(i,k,j,p_so2) 					&
+					+ebu(i,k,j,p_ebu_so2)*conv_rho 
+				! SAN 07/06/14: Adding biomass burning NH3 emissions
+				chem(i,k,j,p_nh3) = chem(i,k,j,p_nh3) 					&
+					+ebu(i,k,j,p_ebu_nh3)*conv_rho     
+				
+		! Only gas phase species added here. MOSAIC aerosol to be mapped in module_mosaic_addemiss.F  
+            enddo
+          enddo
+        enddo
+
       CASE (MOZART_KPP,MOZCART_KPP,MOZART_MOSAIC_4BIN_KPP, MOZART_MOSAIC_4BIN_AQ_KPP )
         if( biomass_burn_opt == BIOMASSB_MOZC .or. biomass_burn_opt == BIOMASSB_MOZ ) then
           do j=jts,jte
