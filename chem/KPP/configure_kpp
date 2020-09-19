@@ -130,7 +130,7 @@ $PSCC
 
 # Uncomment or set your path to yacc in your environment
 #  YACC=yacc -d 
-
+YACC=/work/n02/n02/lowe/WRF-CHEM_Compiling/archer/byacc/yacc -d
 
 #    The name of your lexical analizer. KPP requires FLEX to be used.
 #    FLEX is a public domain lexical analizer and you can download it from
